@@ -1,288 +1,114 @@
 # Redis Rate Limiter using Python
 
-> Learn how Rate Limiting works, why Redis is widely used for it, and build different Rate Limiting algorithms in Python with simple, practical examples.
+I've come across many Rate Limiting implementations that show the code but skip the engineering decisions behind it. This repository is my attempt to bridge that gap by implementing each algorithm from scratch using Python and Redis, while explaining where it fits—and where it doesn't.
+
+Most articles about Rate Limiting focus on the algorithm itself.
+
+They explain **Fixed Window**, **Token Bucket**, or **Sliding Window**, followed by a few lines of code using `INCR` and `EXPIRE`.
+
+What they rarely explain is **why these algorithms exist**, **what problem each one solves**, and **when one approach becomes a poor choice for a production system**.
+
+After working on backend systems, one thing became clear:
+
+> Choosing the wrong Rate Limiting algorithm is rarely a correctness problem—it's usually a scalability problem.
+
+An OTP service, a payment gateway, a public REST API, and an AI inference endpoint all require Rate Limiting, but they don't necessarily require the same algorithm.
+
+A Fixed Window Counter may be perfectly acceptable for one workload, while another system benefits from a Token Bucket because it needs to absorb short traffic bursts without rejecting legitimate users.
+
+This repository was created to explain those trade-offs through simple Python implementations backed by Redis.
+
+The goal is not to build another Rate Limiting library.
+
+The goal is to understand **how these algorithms work**, **why Redis is commonly used**, and **how to implement each approach from scratch**.
+
+Every implementation is intentionally small, fully runnable, and focuses on one idea at a time.
+
+No frameworks.
+
+No unnecessary abstractions.
+
+No hidden magic.
+
+Just the algorithm, Redis, and Python.
 
 ---
 
-## 📖 About This Repository
+# What You'll Find
 
-Rate Limiting is one of the most common techniques used in modern backend systems to protect applications from abuse, prevent server overload, and ensure fair usage of resources.
+Instead of covering only the "happy path", each algorithm is explained from an engineering perspective.
 
-Whether you're building a login system, an OTP service, a payment gateway, or a public REST API, chances are you'll need some form of Rate Limiting.
+Every chapter follows the same structure:
 
-In this repository, you'll learn:
-
-- What Rate Limiting is
-- Why applications need it
-- Why Redis is commonly used
-- Different Rate Limiting algorithms
-- How each algorithm works internally
-- Complete Python implementations
-- Advantages and limitations of each approach
-- Real-world use cases
-
-Every implementation is intentionally kept simple so you can understand the core concepts without unnecessary complexity.
-
----
-
-# 🎯 Who Is This Repository For?
-
-This repository is suitable for:
-
-- Beginners learning Redis
-- Python Developers
-- Backend Developers
-- Full Stack Developers
-- Developers preparing for system design interviews
-- Anyone curious about how Rate Limiting works
-
----
-
-# 🚀 What You Will Learn
-
-By the end of this repository, you'll understand:
-
-- Why Rate Limiting is important
-- How Redis helps implement Rate Limiting
-- Different Rate Limiting algorithms
-- Which Redis data structures are used
-- When to choose each algorithm
-- How to build your own Rate Limiter in Python
-
----
-
-# 📚 Repository Structure
-
-```
-redis-rate-limiter-using-python/
-
-│
-├── README.md
-│
-├── docs/
-│   ├── 01_what_is_rate_limiting.md
-│   ├── 02_why_redis.md
-│   ├── 03_fixed_window.md
-│   ├── 04_sliding_window_log.md
-│   ├── 05_sliding_window_counter.md
-│   ├── 06_token_bucket.md
-│   ├── 07_leaky_bucket.md
-│   ├── 08_algorithm_comparison.md
-│   └── 09_real_world_examples.md
-│
-├── examples/
-│   ├── fixed_window.py
-│   ├── sliding_window_log.py
-│   ├── sliding_window_counter.py
-│   ├── token_bucket.py
-│   └── leaky_bucket.py
-│
-├── requirements.txt
-└── docker-compose.yml
-```
-
----
-
-# 📖 Learning Path
-
-We recommend reading the chapters in the following order.
-
-| Chapter | Topic |
-|----------|-------|
-| 01 | What is Rate Limiting? |
-| 02 | Why Redis? |
-| 03 | Fixed Window Counter |
-| 04 | Sliding Window Log |
-| 05 | Sliding Window Counter |
-| 06 | Token Bucket |
-| 07 | Leaky Bucket |
-| 08 | Algorithm Comparison |
-| 09 | Real World Examples |
-
-Each chapter includes:
-
-- Business Problem
-- Simple Explanation
-- Redis Commands Used
-- Redis Data Structure
-- Python Implementation
+- The business problem
+- Why Rate Limiting is required
+- Why Redis is a good fit
+- How the algorithm works internally
+- Complete Python implementation
 - Advantages
 - Limitations
-- When to Use
+- Typical production use cases
+
+The emphasis is on understanding the reasoning behind each design rather than simply copying code.
 
 ---
 
-# 🌍 Real-World Examples
+# Algorithms Covered
 
-Throughout this repository, we'll solve problems commonly found in production systems.
+- Fixed Window Counter
+- Sliding Window Log
+- Sliding Window Counter
+- Token Bucket
+- Leaky Bucket
 
-Examples include:
-
-- OTP Verification
-- Login Protection
-- Password Reset APIs
-- Public REST APIs
-- AI APIs
-- Payment APIs
-- File Upload APIs
-- Search APIs
-
-These examples will help you understand where each algorithm fits best.
+Each implementation is independent, allowing you to study one algorithm at a time without relying on a large framework or shared infrastructure.
 
 ---
 
-# 💻 Prerequisites
+# Why Redis?
 
-Basic knowledge of:
+Redis has become the default choice for distributed Rate Limiting because it offers exactly the primitives these algorithms need:
 
-- Python
-- APIs
-- HTTP Requests
+- Atomic counters
+- Key expiration (TTL)
+- Fast in-memory operations
+- Sorted Sets for timestamp-based algorithms
+- Consistent performance under high request volumes
 
-No prior Redis knowledge is required.
-
----
-
-# ⚙️ Technologies Used
-
-- Python 3.12+
-- Redis 7+
-- redis-py
+Throughout this repository, you'll see not only **which Redis commands are used**, but also **why they're chosen**.
 
 ---
 
-# 📦 Installation
+# Repository Structure
 
-## 1. Clone the repository
+```text
+docs/
+    01_what_is_rate_limiting.md
+    02_why_redis.md
+    03_fixed_window.md
+    04_sliding_window_log.md
+    05_sliding_window_counter.md
+    06_token_bucket.md
+    07_leaky_bucket.md
+    08_algorithm_comparison.md
+    09_real_world_examples.md
 
-```bash
-git clone https://github.com/<your-username>/redis-rate-limiter-using-python.git
-
-cd redis-rate-limiter-using-python
+examples/
+    fixed_window.py
+    sliding_window_log.py
+    sliding_window_counter.py
+    token_bucket.py
+    leaky_bucket.py
 ```
 
 ---
 
-## 2. Install Python dependencies
+# Who Is This Repository For?
 
-```bash
-pip install -r requirements.txt
-```
+This repository is aimed at developers who want to move beyond copy-pasting Rate Limiting examples and understand the engineering decisions behind them.
 
----
-
-## 3. Start Redis
-
-If Redis is already installed:
-
-```bash
-redis-server
-```
-
-Or using Docker:
-
-```bash
-docker compose up -d
-```
+Whether you're preparing for backend interviews, designing APIs, or simply curious about how production systems protect themselves from abuse, the examples here are designed to be practical, concise, and easy to experiment with.
 
 ---
 
-# ▶️ Running Examples
-
-Every algorithm has its own standalone Python file.
-
-Example:
-
-```bash
-python examples/fixed_window.py
-```
-
-No additional configuration is required.
-
----
-
-# 🧠 Algorithms Covered
-
-## 1. Fixed Window Counter
-
-The simplest Rate Limiting algorithm.
-
-Uses a Redis counter that resets after a fixed time window.
-
----
-
-## 2. Sliding Window Log
-
-Stores every request timestamp to provide more accurate Rate Limiting.
-
----
-
-## 3. Sliding Window Counter
-
-An optimized version of Sliding Window Log that uses less memory while maintaining good accuracy.
-
----
-
-## 4. Token Bucket
-
-Allows occasional bursts of traffic while maintaining a controlled average request rate.
-
-One of the most widely used algorithms in modern APIs.
-
----
-
-## 5. Leaky Bucket
-
-Processes requests at a constant rate, smoothing out traffic spikes.
-
-Commonly used in networking and traffic shaping.
-
----
-
-# 📊 Algorithm Comparison
-
-At the end of this repository, we'll compare all algorithms based on:
-
-- Accuracy
-- Memory Usage
-- Performance
-- Burst Handling
-- Complexity
-- Typical Use Cases
-
-This will help you choose the right algorithm for your application.
-
----
-
-# 🎯 Repository Goals
-
-This repository focuses on learning through practical examples.
-
-Our goals are to:
-
-- Explain concepts simply
-- Build working Python implementations
-- Use Redis effectively
-- Keep code clean and readable
-- Avoid unnecessary complexity
-- Help developers understand the "why" behind each algorithm
-
----
-
-# 🤝 Contributions
-
-Contributions are welcome!
-
-If you find a bug, have an improvement, or want to add another example, feel free to open an issue or submit a pull request.
-
----
-
-# ⭐ Support
-
-If you find this repository helpful:
-
-- Star the repository
-- Share it with other developers
-- Follow along as new algorithms and examples are added
-
-Happy Learning! 🚀
+If this repository helps you understand Rate Limiting a little better, consider giving it a ⭐.
